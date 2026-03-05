@@ -2,6 +2,8 @@
 
 ClimSight is an advanced tool that integrates Large Language Models (LLMs) with climate data to provide localized climate insights for decision-making. ClimSight transforms complex climate data into actionable insights for agriculture, urban planning, disaster management, and policy development.
 
+> **CHART Use Case:** ClimSight serves as the technical infrastructure for [CHART (Climate-Health Adaptation and Response Tool)](CHART_USE_CASE.md) -- a climate-health decision support tool for maternal, newborn, and child health planning in India and Kenya. CHART connects seasonal climate outlooks to evidence-based health interventions for district-level health officers. See the [full CHART use case document](CHART_USE_CASE.md) for the research landscape, competitive analysis, intervention evidence base, and implementation roadmap.
+
 The target audience includes researchers, providers of climate services, policymakers, agricultural planners, urban developers, and other stakeholders who require detailed climate information to support decision-making. ClimSight is designed to democratize access to climate data, empowering users with insights relevant to their specific contexts.
 
 ![Image](https://github.com/user-attachments/assets/f9f89735-ef08-4c91-bc03-112c8e4c0896)
