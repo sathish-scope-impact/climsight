@@ -12,7 +12,8 @@ This folder contains deep research conducted to position ClimSight as the techni
 | [climate_data_sources.md](climate_data_sources.md) | Evaluation of climate data APIs and datasets. Covers Open-Meteo, ERA5, ECMWF SEAS5, IMD, KMD, IRI, CHIRPS. Includes recommended data strategy for MVP and production, plus derived indicators for MNCH. |
 | [dhis2_integration.md](dhis2_integration.md) | DHIS2 ecosystem analysis and integration strategy. Covers DHIS2 Climate App, CHAP, Global Fund funding, DHIS2 in Kenya/India, 3 integration options, API details, and recommended phased architecture. |
 | [country_context.md](country_context.md) | Country profiles for Kenya (recommended first pilot) and India (second phase). Health system structure, MNCH indicators, climate-health risks, policy frameworks, digital infrastructure, and recommended pilot locations. |
-| [building_on_climsight.md](building_on_climsight.md) | **Technical evaluation of every ClimSight component for CHART reuse.** Component-by-component assessment (reuse/modify/replace), proposed workflow extensions, new tools to build, implementation phases, lines-of-code estimates. The implementation blueprint. |
+| [building_on_climsight.md](building_on_climsight.md) | **Initial technical evaluation of every ClimSight component for CHART reuse.** Component-by-component assessment (reuse/modify/replace), proposed workflow extensions, new tools to build, implementation phases, lines-of-code estimates. Includes Appendix A with critical analysis and 5 Whys. |
+| [building_chart_revised.md](building_chart_revised.md) | **Revised implementation plan incorporating critical analysis.** Supersedes the initial evaluation's timeline and effort estimates. Accounts for health knowledge curation, clinical validation, regulatory compliance, data partnerships, and team composition. The authoritative implementation blueprint. |
 
 ## Key Findings
 
@@ -26,7 +27,7 @@ This folder contains deep research conducted to position ClimSight as the techni
 
 5. **Open-Meteo for MVP, national met services for production** -- free climate APIs get the prototype running; IMD/KMD seasonal outlooks add credibility for district officers.
 
-6. **ClimSight is 70-80% reusable for CHART** -- LangGraph orchestration, RAG system, climate pipeline, tool-calling agents, and UI are domain-agnostic. ~1,600 new lines of code + 60 modified lines needed. 6 new files, 4 modified files. Existing 5,000+ lines remain untouched.
+6. **ClimSight infrastructure is genuinely reusable but covers ~20% of total CHART effort** -- LangGraph, RAG, tools, and UI save 2-3 months of greenfield engineering. But health KB curation (25-30%), clinical validation (15-20%), and data partnerships (15-20%) are entirely new work. CHART is a 12-18 month project, not a 14-week project. Requires public health expertise, not just software engineering.
 
 ## Research Date
 
