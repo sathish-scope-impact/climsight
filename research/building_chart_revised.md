@@ -35,6 +35,47 @@ The initial evaluation claimed ClimSight is "70-80% reusable" for CHART. After c
 
 ---
 
+## 1B. Positioning: What CHART Actually Is
+
+*Based on stakeholder analysis of ScopeImpact project documents. Full analysis: `chart_positioning_analysis.md`*
+
+### One-line positioning
+
+CHART is the missing layer between climate science and local health action -- translating seasonal forecasts into costed, pre-positioned resource plans for subnational health managers.
+
+### The user and their problem
+
+The primary user is a **County Health Director** (Kenya) or **District Medical Officer** (India) managing a quarterly health budget. Today they receive KMD seasonal outlooks via email/WhatsApp that say "10% more rainfall expected" -- but nothing that translates this into "30% more malaria cases at Clinic X, pre-position cholera kits by March 15."
+
+Their current planning artifact is the **Annual Work Plan (AWP)**. Decisions are reactive (respond to outbreaks after they start) or historical (last year's budget = this year's budget). CHART creates a new artifact: a **seasonal adaptation plan** that feeds directly into the AWP cycle.
+
+### The product is the Action Repository, not the AI
+
+CHART's competitive moat is the **110+ costed health interventions** (vetted by experts) and **embedded MOH relationships** -- not the code. Global tools (WHO ClimHealth, CHIRTS, IRI) provide national-level models. CHART differentiates by being hyper-local and including actionable, costed interventions.
+
+Open-sourcing the code as a Digital Public Good is safe because the code without the KB and institutional relationships has limited value.
+
+### Where the LLM earns its keep
+
+The LLM is justified specifically at the **translation layer**: synthesizing qualitative local knowledge ("the bridge to Clinic B floods regularly") with quantitative climate/health data to produce a contextualized, policy-grade plan. This validates the `data_analysis_agent` reasoning loop as the genuinely agentic core.
+
+### Six constraints that shape the build
+
+| Constraint | Source | Implication |
+|---|---|---|
+| Output must map to AWP line items | Kenya MOH engagement | `combine_agent` produces budget amendments, not narrative reports |
+| Human-in-the-loop governance | CHART Protocol India V.2 | Clinical review gate is non-optional; TWG sign-off required |
+| 4-6 week forecast lead time | CHART & CHIP Introduction 2026 | Open-Meteo seasonal forecasts are the decision driver, not ERA5 reanalysis |
+| Decision Support classification (not medical device) | Technical Proposal | CHART must never output diagnostic advice; stay in planning/resource lane |
+| DPG sustainability model | UBS soft launch overview | Minimize API costs: cached data, smaller models for extraction, pre-computed plans |
+| Calendar-aligned delivery | CHART technical narrative for UBS | Recommendations timed to AWP submission deadlines, not on-demand |
+
+### The biggest risk is not technical
+
+**Institutional inertia** -- governments too rigid to act on AI-generated predictions -- is the primary failure mode. Mitigation is participatory co-design: county health officers help build the Action Repository during the pilot phase, creating ownership and trust before the tool goes live.
+
+---
+
 ## 2. What ClimSight Genuinely Provides
 
 These components are reusable as-is, verified by codebase inspection:
