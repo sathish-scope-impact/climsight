@@ -100,7 +100,85 @@ This is proven, not hypothetical -- `smart_agent` was added exactly this way (li
 
 ---
 
-## 3. What Must Be Built New
+## 3. Architecture Decisions for CHART: What to Keep, What to Simplify
+
+ClimSight's multi-agent architecture is overengineered for data extraction but appropriately designed for synthesis and analysis. CHART should preserve what genuinely benefits from the agent pattern and simplify what doesn't.
+
+### Where the Agent Design Genuinely Adds Value
+
+**1. Graceful degradation.** Each agent is independent. If the RAG database is missing, the pipeline still runs -- `ipcc_rag_agent` returns `"None"` and `combine_agent` works with what it has. If ERA5 is unavailable, everything else still works. If `smart_agent` is disabled, the graph skips that node. With a rigid data pipeline, you'd need explicit error handling for every combination of failures. With agents, it's built into the architecture.
+
+**2. LLM wrapping is valuable for translation steps.** The `data_agent` doesn't just call `get_climate(lat, lon)`. It takes raw extracted data and uses the LLM to describe it -- turning a table of numbers into natural language that `combine_agent` can reason over. Similarly, `zero_rag_agent` takes raw geographic data (soil codes, land use classifications) and produces a human-readable environmental profile. That contextualization requires language.
+
+**3. Parallel execution is real value.** Five data sources fetched simultaneously. LangGraph gives you parallel fan-out with a declarative graph -- equivalent to `asyncio.gather()` but with built-in state management and error isolation. Wall-clock time savings are significant.
+
+**4. The `data_analysis_agent` is genuinely agentic.** This is the one part where the agent pattern fully earns its keep. It reads extracted data, decides what analysis is relevant to the user's question, writes Python code, runs it, examines the resulting plot, decides if it's good enough, fixes it if not, and decides what to analyze next. That's an actual reasoning loop. A fixed pipeline can't do "the user asked about heat stress for pregnant women, so I should compute WBGT and overlay preterm birth risk thresholds."
+
+**5. Composability and extensibility.** Adding a new data source = add a node + add an edge. The rest of the graph doesn't change. Making an agent optional = one config flag. This makes it easy to experiment with different configurations without rewriting the pipeline.
+
+**6. State management is solved.** `AgentState` as a shared Pydantic model means every agent can read what every other agent produced without manually threading data through function arguments. Add a new field, populate it in one agent, consume it in another.
+
+**7. Deterministic routing is auditable.** Given the same config, the same agents run in the same order every time. You can log exactly what happened, in what order, with what inputs. An autonomous agent that decides its own path is harder to debug and reproduce.
+
+**8. The `intro_agent` filter saves real cost.** If someone types an irrelevant query, the pipeline exits immediately. Without it, you'd run 5 parallel agents, fetch climate data, query RAG databases -- all for nothing.
+
+### Where CHART Should Simplify
+
+The data extraction agents (`data_agent`, `zero_rag_agent`) are functions dressed as agents. They always run, always call the same functions, and the LLM step is pure translation. For CHART, consider:
+
+**Option A: Keep the pattern, extend it (recommended for MVP).** The overhead of "function wrapped in agent" is small (one LLM call per agent for translation). The graceful degradation, parallel execution, and composability benefits apply equally to CHART's health data sources. Adding `health_data_agent` and `health_rag_agent` as new parallel nodes is trivial and consistent.
+
+**Option B: Replace data extraction with Dagster pipelines (consider for production).** If CHART grows to handle batch processing (e.g., seasonal plans for all 47 Kenyan counties), Dagster provides:
+- Scheduled pipeline execution (daily/weekly data refresh)
+- Asset-based lineage tracking (which data produced which output)
+- Built-in retry/backfill for failed data fetches
+- Materialization history (when was this data last refreshed?)
+
+**Dagster vs. LangGraph is not either/or.** The right architecture is:
+- **Dagster** for the data pipeline layer: scheduled fetching of climate data, DHIS2 health indicators, ERA5 updates, intervention KB refreshes. These are deterministic, repeatable, and benefit from scheduling/monitoring.
+- **LangGraph** for the reasoning layer: user query interpretation, risk assessment, intervention matching, synthesis. These require LLM reasoning and benefit from the agent pattern.
+
+```
+Dagster (data pipeline, scheduled):
+  Climate data fetch --> materialized assets
+  DHIS2 indicator pull --> materialized assets
+  ERA5 update --> materialized assets
+  KB refresh (triggered) --> materialized assets
+
+LangGraph (reasoning, per-query):
+  intro_agent --> [parallel: health_rag, climate_rag, risk_assessment]
+             --> data_analysis_agent --> combine_agent
+```
+
+This separation means the LangGraph agents don't fetch data at query time -- they read from pre-materialized Dagster assets. Faster queries, cleaner architecture, and Dagster handles the failure/retry/scheduling that LangGraph agents currently do ad-hoc.
+
+**Recommendation:** Start with Option A (extend LangGraph as-is) for Phase 1-2 MVP. Introduce Dagster in Phase 3 when batch processing and scheduled data refresh become requirements.
+
+### CHART Agent Inventory (Minimized)
+
+Based on this analysis, CHART needs fewer new agents than the initial evaluation proposed:
+
+| Agent | Pattern | Justification |
+|---|---|---|
+| `intro_agent` | Modify prompt | Change filter to "climate-health-related" -- same cost-saving gate |
+| `climate_rag_agent` | Merge `ipcc_rag_agent` + `general_rag_agent` | One agent querying both climate RAG DBs -- they do the same thing against different collections |
+| `health_rag_agent` | Clone pattern | Searches health intervention KB -- genuinely new |
+| `data_agent` | Keep as-is | Climate data extraction + LLM translation -- still needed |
+| `health_data_agent` | New, follows `data_agent` pattern | DHIS2/published health stats extraction |
+| `data_analysis_agent` | Extend tools | Add health-specific tools (risk thresholds, WBGT) -- the genuinely agentic core |
+| `combine_agent` | Modify prompt | Synthesize climate + health into seasonal plan |
+
+**Removed vs. initial plan:**
+- No separate `health_risk_agent` -- folded into `data_analysis_agent` tools (it's a computation, not a reasoning loop)
+- No separate `intervention_matching_agent` -- folded into `health_rag_agent` + `data_analysis_agent` (RAG search + post-filtering)
+- Merge `ipcc_rag_agent` + `general_rag_agent` into single `climate_rag_agent` (they query different DBs but follow identical logic)
+- `zero_rag_agent` kept but candidate for merge with `data_agent` in Phase 3
+
+**Net result:** 7 agents (down from 9+ in initial plan), with clearer separation between data extraction (function-like) and reasoning (genuinely agentic).
+
+---
+
+## 4. What Must Be Built New
 
 ### A. Health Knowledge Base (CRITICAL PATH -- 3-6 months)
 
@@ -251,19 +329,21 @@ Health prompts will be equally complex and require clinical expert review. **Rev
 
 ---
 
-## 4. Revised Implementation Roadmap
+## 5. Revised Implementation Roadmap
 
 ```
 Phase 1: Foundation (Month 1-3)
-  PARALLEL TRACK A -- Engineering:
+  PARALLEL TRACK A -- Engineering (7 agents, not 9+):
+    - Merge ipcc_rag_agent + general_rag_agent into climate_rag_agent
     - Health intervention Chroma DB (initial, unvalidated)
-    - health_rag_agent (clone ipcc_rag_agent pattern)
+    - health_rag_agent (clone climate_rag_agent pattern, different DB)
+    - health_data_agent (DHIS2 demo / published stats)
     - Open-Meteo seasonal forecast tool
-    - Derived health indicators (consecutive heat days, SPI, WBGT)
-    - Modified combine_agent prompt for health synthesis
+    - Derived health indicators as data_analysis_agent tools (WBGT, SPI, heat days)
+    - Modified intro_agent + combine_agent prompts
     - Config extensions + CHART mode toggle
     - AgentState extensions (10 new fields)
-    Result: ClimSight that returns climate + health information for any location
+    Result: 7-agent graph returning climate + health information for any location
 
   PARALLEL TRACK B -- Domain:
     - Begin DHIS2 MoU process with Kenya MOH
@@ -275,8 +355,8 @@ Phase 1: Foundation (Month 1-3)
 
 Phase 2: Health Intelligence (Month 3-6)
   - Validated intervention KB (expert panel review of top-20 interventions)
-  - health_risk_agent (climate-to-health risk mapping)
-  - intervention_matching_agent (risk -> evidence-based intervention)
+  - Risk thresholds as data_analysis_agent tools (not separate agent)
+  - Intervention matching via health_rag_agent + data_analysis_agent post-filtering
   - Structured output schemas (HealthRiskAssessment, InterventionRecommendation)
   - "Refuse to recommend" pathway for insufficient evidence
   - Health-specific predefined plots
@@ -287,16 +367,22 @@ Phase 2: Health Intelligence (Month 3-6)
 Phase 3: Integration + Validation (Month 6-10)
   - DHIS2 production integration (if MoU granted)
   - Clinical review gate (structured validation before output)
+  - Introduce Dagster for scheduled data pipelines:
+      * Climate data refresh (ERA5, Open-Meteo)
+      * DHIS2 health indicator pulls
+      * KB update pipeline
+      * LangGraph agents read from materialized Dagster assets
   - Pilot deployment in 3 Kenyan counties with county health teams
   - User feedback collection and prompt tuning
   - KB expansion based on field validation
   - Regulatory compliance verification
-  Result: Field-tested system with validated outputs
+  - Consider merging zero_rag_agent into data_agent (simplification)
+  Result: Field-tested system with validated outputs + scheduled data pipelines
 
 Phase 4: Production + Scale (Month 10-18)
   - DHIS2 write-back (seasonal plans into DHIS2)
   - National met service integration (KMD seasonal outlooks)
-  - Multi-county batch processing
+  - Dagster-orchestrated batch processing for all 47 Kenyan counties
   - India expansion (NFHS data, IMD forecasts)
   - Monitoring indicator framework
   - Ongoing KB maintenance pipeline
@@ -305,7 +391,7 @@ Phase 4: Production + Scale (Month 10-18)
 
 ---
 
-## 5. Team Composition (Revised)
+## 6. Team Composition (Revised)
 
 The initial evaluation implicitly assumed a software engineering team. CHART requires:
 
@@ -322,7 +408,7 @@ The initial evaluation implicitly assumed a software engineering team. CHART req
 
 ---
 
-## 6. Risk Register (Revised)
+## 7. Risk Register (Revised)
 
 | # | Risk | Likelihood | Impact | Mitigation | Owner |
 |---|---|---|---|---|---|
@@ -339,7 +425,7 @@ The initial evaluation implicitly assumed a software engineering team. CHART req
 
 ---
 
-## 7. What NOT to Build (Scope Boundaries)
+## 8. What NOT to Build (Scope Boundaries)
 
 Based on the critical analysis, these are explicitly out of scope for MVP:
 
@@ -352,7 +438,7 @@ Based on the critical analysis, these are explicitly out of scope for MVP:
 
 ---
 
-## 8. Revised LOC Estimate
+## 9. Revised LOC Estimate
 
 | Component | New Lines | Modified Lines | Files | Notes |
 |---|---|---|---|---|
@@ -378,7 +464,7 @@ Based on the critical analysis, these are explicitly out of scope for MVP:
 
 ---
 
-## 9. Success Criteria
+## 10. Success Criteria
 
 **Phase 1 (Month 3):**
 - System generates health-relevant RAG responses for any location in Kenya
@@ -399,7 +485,7 @@ Based on the critical analysis, these are explicitly out of scope for MVP:
 
 ---
 
-## 10. Relationship to Initial Evaluation
+## 11. Relationship to Initial Evaluation
 
 The initial evaluation (`building_on_climsight.md`) remains valuable as a **component-level technical reference**. Its line-by-line codebase analysis is accurate and useful for developers. This revised document adds:
 
