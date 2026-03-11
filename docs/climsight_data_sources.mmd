@@ -1,0 +1,151 @@
+graph TB
+    %% ── User Input ──
+    UQ["User Query\n(lat, lon, question)"]
+
+    %% ── External APIs ──
+    subgraph APIs ["External APIs - Live"]
+        NOM["Nominatim API\nReverse Geocoding"]
+        ETOPO["ETOPO1 API\nElevation"]
+        ISRIC["ISRIC SoilGrids API\nSoil Classification"]
+        OSM["Overpass API\nLand Use - OSM"]
+        GBIF["GBIF API\nBiodiversity Occurrences"]
+    end
+
+    %% ── Static Local Files ──
+    subgraph StaticFiles ["Static Local Data Files"]
+        NE_COAST["ne_10m_coastline.shp\nCoastline Distance"]
+        NE_LAND["ne_10m_land.shp\nLand/Water Detection"]
+        NE_LAKES["ne_10m_lakes.shp\nInland Water Bodies"]
+        NE_RIVERS["ne_10m_rivers.shp\nRiver Systems"]
+        HAZ_CSV["GDIS 1960-2018.csv\nDisaster Locations\nRosvold and Buhaug 2021"]
+        POP_CSV["WPP2022_Medium.csv\nPopulation Indicators\nUN DESA 2022"]
+        ECOCROP["EcoCrop_DB.csv\nCrop Suitability\nFAO GAEZ v4"]
+    end
+
+    %% ── Climate Model NetCDFs ──
+    subgraph ClimateModels ["Climate Model Data - NetCDF"]
+        NGEMS["nextGEMS\nIFS-FESOM 9-5\nHEALPix grid\n2020-2049 decadal\nvars: mean2t, tp\nwind_u, wind_v"]
+        ICCP["ICCP\nTCo319-DART\nRegular lat/lon\n2020-2099 decadal\nSSP5-8.5\nvars: mean2t, tp"]
+        AWI["AWI-CM\nCMIP6\nRegular lat/lon\nHist 1985-2004\nFuture SSP5-8.5\nvars: tas, pr, uas, vas"]
+        DESTNE["DestinE\nIFS-FESOM\nUnstructured grid\nHist 1990-2014\nSSP3-7.0 to 2049\nvars: avg_2t, avg_tprate\navg_10u, avg_10v"]
+    end
+
+    %% ── ERA5 ──
+    subgraph ERA5 ["ERA5 Reanalysis - Observational"]
+        ERA5_CLIM["ERA5 Climatology\nZarr pre-computed\n2015-2025 avg 0.25deg\nvars: t2m, tp, u10, v10\nd2m, msl, sp, sst\nHersbach et al. 2020"]
+        ERA5_RET["ERA5 Retrieval\nArraylake on-demand\n1979-2024 time series\nvars: t2, sst, u10, v10\ncp, lsp, sd, tcc, mslp"]
+    end
+
+    %% ── RAG Vector Stores ──
+    subgraph RAG ["RAG Vector Stores - Chroma"]
+        IPCC_RAG["IPCC RAG DB\nAR6 WGI/II/III\nChunks: 2000 chars\nEmbed: text-embedding-3-large\nIPCC 2022"]
+        GEN_RAG["General Reports RAG DB\n20 reports WMO UNEP\nNOAA USGCRP\nEmbed: text-embedding-3-large"]
+        DEST_RAG["DestinE Param RAG DB\n82 Climate DT parameters\nSemantic search index"]
+    end
+
+    %% ── DestinE Live ──
+    DEST_POLY["DestinE Polytope API\nIFS-NEMO SSP3-7.0\n2020-2039 hourly\npolytopeapirc auth"]
+
+    %% ── Processing Layer: Agents ──
+    subgraph Agents ["LangGraph Agent Pipeline"]
+        INTRO["intro_agent\nValidates climate relevance"]
+
+        subgraph Parallel ["Parallel Information Gathering"]
+            DATA_AG["data_agent\nDataFrame 12x months\nCols: Month Present/Future\nTemp Precip Wind"]
+            ZERO_AG["zero_rag_agent\ndict: location elevation\nsoil land_use coastline\nbiodiversity hazards"]
+            IPCC_AG["ipcc_rag_agent\nstr: IPCC context\nlist: source docs"]
+            GEN_AG["general_rag_agent\nstr: literature context\nlist: source docs"]
+            SMART_AG["smart_agent\noptional\ndict: Wikipedia\nECOCROP RAG results"]
+        end
+
+        PREPARE["prepare_predefined_data\nExtracts ERA5 climatology\nGenerates 3 standard plots"]
+        DA_AG["data_analysis_agent\noptional\nPython REPL plus tools\nCustom analysis and viz"]
+        COMBINE["combine_agent\nSynthesizes all outputs\nStructured markdown report"]
+    end
+
+    %% ── Output Artifacts ──
+    subgraph Outputs ["Output Artifacts"]
+        CLIM_PLOT["Climate Comparison Plot\nModel projections vs\nERA5 observed baseline"]
+        DIS_PLOT["Disaster Summary Plot\nHistorical hazard\nfrequency bar chart"]
+        POP_PLOT["Population Projection Plot\nDemographics multi-axis"]
+        CUSTOM_VIZ["Custom Visualizations\nAgent-generated analysis\nplots Zarr to PNG"]
+        REPORT["Final Report\n800-1500 word markdown\n7 mandatory sections"]
+    end
+
+    %% ── AgentState ──
+    STATE["AgentState\nPydantic model shared state bus\nFields: user input_params df_list\nera5_climatology_response hazard_data\npredefined_plots data_analysis_images\nreferences agent_responses"]
+
+    %% ═══════════════════════════════════
+    %% RELATIONSHIPS
+    %% ═══════════════════════════════════
+
+    %% User to Intro
+    UQ --> INTRO
+    INTRO -->|"CONTINUE"| Parallel
+    INTRO -->|"FINISH non-climate"| REPORT
+
+    %% APIs to zero_agent
+    NOM -->|"address country"| ZERO_AG
+    ETOPO -->|"elevation m"| ZERO_AG
+    ISRIC -->|"WRB soil class"| ZERO_AG
+    OSM -->|"landuse tags"| ZERO_AG
+    GBIF -->|"genus list"| ZERO_AG
+
+    %% Static geo to zero_agent
+    NE_COAST -->|"distance m"| ZERO_AG
+    NE_LAND -->|"is_on_land bool"| ZERO_AG
+    NE_LAKES -->|"lake detection"| ZERO_AG
+    NE_RIVERS -->|"river proximity"| ZERO_AG
+
+    %% Hazards and Population to zero_agent
+    HAZ_CSV -->|"filtered events\nwithin 5deg radius"| ZERO_AG
+    POP_CSV -->|"country demographics\n10-yr aggregated"| ZERO_AG
+
+    %% Climate models to data_agent
+    NGEMS -->|"xarray Dataset\nHEALPix nearest cell"| DATA_AG
+    ICCP -->|"xarray Dataset\nregular grid interp"| DATA_AG
+    AWI -->|"xarray Dataset\nlat/lon lookup"| DATA_AG
+    DESTNE -->|"xarray Dataset\nunstructured nearest"| DATA_AG
+
+    %% RAG to RAG agents
+    IPCC_RAG -->|"semantic search\nrelevant chunks"| IPCC_AG
+    GEN_RAG -->|"semantic search\nrelevant chunks"| GEN_AG
+
+    %% EcoCrop and RAG to smart_agent
+    ECOCROP -->|"crop suitability\nscores"| SMART_AG
+    GEN_RAG -.->|"secondary RAG\nsearch"| SMART_AG
+
+    %% All parallel to state
+    DATA_AG -->|"df_list"| STATE
+    ZERO_AG -->|"zero_agent_response"| STATE
+    IPCC_AG -->|"ipcc_rag_agent_response"| STATE
+    GEN_AG -->|"general_rag_agent_response"| STATE
+    SMART_AG -->|"smart_agent_response"| STATE
+    STATE --> PREPARE
+
+    %% ERA5 climatology to prepare
+    ERA5_CLIM -->|"12 monthly values\nper variable ground truth"| PREPARE
+
+    %% prepare to plots
+    PREPARE --> CLIM_PLOT
+    PREPARE --> DIS_PLOT
+    PREPARE --> POP_PLOT
+
+    %% prepare routes
+    PREPARE -->|"use_powerful_data_analysis"| DA_AG
+    PREPARE -->|"skip analysis"| COMBINE
+
+    %% ERA5 retrieval and DestinE to data_analysis_agent
+    ERA5_RET -->|"Zarr time series\n1979-2024"| DA_AG
+    DEST_POLY -->|"Zarr point series\n2020-2039 hourly"| DA_AG
+    DEST_RAG -->|"parameter discovery\n82 DestinE params"| DA_AG
+
+    DA_AG --> CUSTOM_VIZ
+    DA_AG --> COMBINE
+
+    %% Combine to final
+    CLIM_PLOT --> COMBINE
+    DIS_PLOT --> COMBINE
+    POP_PLOT --> COMBINE
+    CUSTOM_VIZ --> COMBINE
+    COMBINE --> REPORT
