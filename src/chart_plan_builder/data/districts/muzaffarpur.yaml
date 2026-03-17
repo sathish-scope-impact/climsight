@@ -1,0 +1,101 @@
+# District Profile: Muzaffarpur, Bihar
+# Source: Census 2011, NHM facility data, NPCCHH district profile
+
+name: Muzaffarpur
+state: Bihar
+population: 4801062  # Census 2011
+
+blocks:
+  - Aurai
+  - Bandra
+  - Bochahan
+  - Gaighat
+  - Kanti
+  - Kurhani
+  - Marwan
+  - Minapur
+  - Motipur
+  - Mushahari
+  - Paroo
+  - Sahebganj
+  - Sakra
+  - Saraiya
+  - Katra
+  - Muraul
+
+health_facilities:
+  district_hospitals: 1
+  chcs: 6
+  phcs: 54
+  scs: 389
+
+historical_hazards:
+  - flooding
+  - heat_wave
+  - vector_borne_disease
+  - waterborne_disease
+  - humidity_extreme
+  - lightning
+
+priority_populations:
+  - Children under 5
+  - Pregnant and lactating women
+  - Elderly (>60 years)
+  - Outdoor manual labourers (brick kiln, agriculture)
+  - Flood-displaced populations in relief camps
+  - Tribal and marginalized communities
+  - Persons with chronic respiratory/cardiovascular conditions
+
+# Active hazards for monsoon 2026 planning
+# These would normally come from IMD seasonal forecast integration
+active_hazards:
+  - hazard_type: flooding
+    severity: 3  # Orange
+    peak_period_mw_start: 27
+    peak_period_mw_end: 37
+    health_impacts:
+      - Drowning and injuries
+      - Waterborne disease outbreaks
+      - Disruption of health services
+      - Mental health impacts
+    confidence: high
+
+  - hazard_type: heat_wave
+    severity: 3  # Orange
+    peak_period_mw_start: 20
+    peak_period_mw_end: 25
+    health_impacts:
+      - Heat stroke and heat exhaustion
+      - Occupational heat illness
+      - Cardiovascular stress
+    confidence: high
+
+  - hazard_type: vector_borne_disease
+    severity: 4  # Red — Muzaffarpur is JE/AES endemic
+    peak_period_mw_start: 26
+    peak_period_mw_end: 40
+    health_impacts:
+      - Japanese encephalitis (AES)
+      - Dengue fever
+      - Malaria
+      - Kala-azar
+    confidence: high
+
+  - hazard_type: waterborne_disease
+    severity: 3  # Orange
+    peak_period_mw_start: 27
+    peak_period_mw_end: 42
+    health_impacts:
+      - Acute diarrheal disease
+      - Cholera risk (post-flooding)
+      - Typhoid
+    confidence: medium
+
+  - hazard_type: humidity_extreme
+    severity: 2  # Yellow
+    peak_period_mw_start: 25
+    peak_period_mw_end: 38
+    health_impacts:
+      - Heat illness amplification
+      - Fungal infections
+    confidence: medium

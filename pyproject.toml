@@ -72,6 +72,10 @@ dependencies = [
     # Configuration & Utilities
     "pyyaml",
     "python-dotenv",
+
+    # CHART Plan Builder
+    "python-docx",
+    "click",
 ]
 
 [project.optional-dependencies]
@@ -90,6 +94,7 @@ where = ["src"]
 
 [project.scripts]
 climsight = "climsight.launch:launch_streamlit"
+chart-plan-builder = "chart_plan_builder.cli:main"
 
 [project.urls]
 "Source" = "https://github.com/CliDyn/climsight"

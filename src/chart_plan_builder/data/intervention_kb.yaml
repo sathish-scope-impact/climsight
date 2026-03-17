@@ -1,0 +1,207 @@
+# CHART Intervention Knowledge Base (seed — 15 interventions)
+# Source: Adapted from Muzaffarpur DHAP template and CHART Airtable KB
+# Full KB has 50+ interventions across 16 hazards and 13 health impact categories
+
+interventions:
+  # --- FLOODING ---
+  - id: FLD-001
+    name: Flood-resilient medical supply pre-positioning
+    description: >
+      Pre-position essential medicines, ORS packets, water purification tablets,
+      and emergency medical kits at PHCs and block-level warehouses in flood-prone
+      blocks before monsoon onset.
+    target_hazards: [flooding]
+    trigger_condition: IMD forecast of above-normal rainfall OR historical flood recurrence
+    responsible_officer_role: District Drug Warehouse Manager / MOIC
+    indicator: "% of PHCs with 4-week buffer stock pre-positioned by MW 24"
+    evidence_quality: high
+    phase: pre_monsoon
+
+  - id: FLD-002
+    name: Mobile medical team deployment for flood-affected areas
+    description: >
+      Deploy mobile medical teams (1 doctor + 2 ANMs + pharmacist) to marooned
+      villages and relief camps within 48 hours of flood onset. Teams carry
+      rapid diagnostic kits for waterborne and vector-borne diseases.
+    target_hazards: [flooding]
+    trigger_condition: District declares flood situation OR >3 blocks reporting inundation
+    responsible_officer_role: CMO / Block Medical Officer
+    indicator: Number of mobile medical teams deployed within 48h of flood alert
+    evidence_quality: high
+    phase: active_monsoon
+
+  - id: FLD-003
+    name: Post-flood disease surveillance intensification
+    description: >
+      Activate daily IDSP reporting from all PHCs in affected blocks. Deploy
+      additional surveillance officers. Monitor for cholera, leptospirosis,
+      hepatitis A/E, and skin infections for 6 weeks post-recession.
+    target_hazards: [flooding, waterborne_disease]
+    trigger_condition: Flood waters recede from inhabited areas
+    responsible_officer_role: District Surveillance Officer (DSO)
+    indicator: "% of PHCs submitting daily IDSP reports in affected blocks"
+    evidence_quality: high
+    phase: post_monsoon
+
+  # --- HEAT WAVE ---
+  - id: HEA-001
+    name: Heat action plan activation and public advisory
+    description: >
+      Activate district heat action plan when IMD issues Orange/Red alert.
+      Issue public advisories through ASHA workers, schools, and media.
+      Establish cooling centers at PHCs and community buildings.
+    target_hazards: [heat_wave]
+    trigger_condition: IMD heat wave Orange or Red alert
+    responsible_officer_role: CMO / District Disaster Management Authority
+    indicator: Number of cooling centers operational within 24h of alert
+    evidence_quality: high
+    phase: pre_monsoon
+
+  - id: HEA-002
+    name: Heat illness treatment protocol at PHCs
+    description: >
+      Train PHC medical officers and staff nurses on heat stroke recognition
+      and management (ice-sheet cooling, IV fluid resuscitation). Ensure
+      availability of ice, IV fluids, and electrolyte solutions at all PHCs.
+    target_hazards: [heat_wave]
+    trigger_condition: Pre-monsoon season onset (MW 14) OR temperature >40°C forecast
+    responsible_officer_role: MOIC at each PHC
+    indicator: "% of PHCs with trained staff and heat illness supplies"
+    evidence_quality: high
+    phase: pre_monsoon
+
+  - id: HEA-003
+    name: Occupational heat stress monitoring for outdoor workers
+    description: >
+      Coordinate with labour department to enforce work-rest schedules for
+      outdoor workers during peak heat hours (12-3 PM). ASHA workers to
+      monitor brick kiln, construction, and agricultural workers for heat illness.
+    target_hazards: [heat_wave, humidity_extreme]
+    trigger_condition: Wet-bulb temperature >28°C or dry-bulb >42°C
+    responsible_officer_role: Block Medical Officer / Labour Department liaison
+    indicator: Number of heat illness cases reported among outdoor workers
+    evidence_quality: moderate
+    phase: active_monsoon
+
+  # --- VECTOR-BORNE DISEASE ---
+  - id: VBD-001
+    name: Pre-monsoon vector breeding site elimination
+    description: >
+      Conduct source reduction campaigns in all urban and peri-urban blocks.
+      Eliminate stagnant water bodies, distribute larvicide to ASHA workers,
+      and enforce anti-larval measures in construction sites.
+    target_hazards: [vector_borne_disease]
+    trigger_condition: MW 20 (4 weeks before expected monsoon onset)
+    responsible_officer_role: District Malaria Officer / District VBD Consultant
+    indicator: "Larval survey index: % reduction in breeding sites from baseline"
+    evidence_quality: high
+    phase: pre_monsoon
+
+  - id: VBD-002
+    name: Rapid diagnostic test (RDT) and ACT supply positioning
+    description: >
+      Ensure all Sub-Centres and PHCs have adequate stock of malaria RDTs,
+      dengue NS1/IgM kits, and artemisinin-based combination therapy (ACT).
+      Target: 120% of previous year's consumption pre-positioned by MW 24.
+    target_hazards: [vector_borne_disease]
+    trigger_condition: Pre-monsoon preparation timeline (MW 20-24)
+    responsible_officer_role: District Malaria Officer / District Drug Store
+    indicator: "% of facilities with adequate RDT and ACT stock by MW 24"
+    evidence_quality: high
+    phase: pre_monsoon
+
+  - id: VBD-003
+    name: Indoor residual spraying and LLIN distribution
+    description: >
+      Complete two rounds of indoor residual spraying (IRS) in high-endemic
+      blocks. Distribute long-lasting insecticidal nets (LLINs) to households
+      in blocks with API >2 and JE-endemic areas.
+    target_hazards: [vector_borne_disease]
+    trigger_condition: Active monsoon season onset OR VBD case count exceeds threshold
+    responsible_officer_role: District Malaria Officer
+    indicator: "% of targeted households covered by IRS; LLIN distribution count"
+    evidence_quality: high
+    phase: active_monsoon
+
+  - id: VBD-004
+    name: JE/AES surveillance and case management strengthening
+    description: >
+      Activate enhanced JE/AES surveillance in endemic blocks. Ensure all PHCs
+      have JE case management protocols. Deploy additional beds and ventilators
+      at district hospital pediatric ward during peak JE season (MW 28-38).
+    target_hazards: [vector_borne_disease]
+    trigger_condition: JE season onset (MW 28) in endemic districts
+    responsible_officer_role: CMO / District Surveillance Officer
+    indicator: JE/AES case fatality rate vs previous year
+    evidence_quality: high
+    phase: active_monsoon
+
+  # --- WATERBORNE DISEASE ---
+  - id: WBD-001
+    name: Drinking water quality surveillance
+    description: >
+      Intensify water quality testing at all public water sources in flood-prone
+      and waterlogging-prone areas. Deploy field testing kits (H2S vials,
+      residual chlorine) to ASHA workers. Ensure chlorination of all piped
+      water supply systems.
+    target_hazards: [waterborne_disease, flooding]
+    trigger_condition: Monsoon onset OR any flooding event
+    responsible_officer_role: District PHED Engineer / Block Medical Officer
+    indicator: "% of water sources tested monthly; % sources meeting BIS standards"
+    evidence_quality: high
+    phase: active_monsoon
+
+  - id: WBD-002
+    name: ORS corner establishment and diarrhea management
+    description: >
+      Establish ORS corners at all Sub-Centres and AWW centers. Train ASHA
+      workers on ORS preparation and zinc supplementation for childhood
+      diarrhea. Pre-position IV fluids for severe dehydration cases at PHCs.
+    target_hazards: [waterborne_disease]
+    trigger_condition: Monsoon season (MW 25 onwards) OR diarrhea outbreak alert
+    responsible_officer_role: MOIC / Block Medical Officer
+    indicator: "Number of ORS corners functional; diarrhea case fatality rate"
+    evidence_quality: high
+    phase: active_monsoon
+
+  - id: WBD-003
+    name: Cholera preparedness and outbreak response readiness
+    description: >
+      Pre-position oral cholera vaccine (OCV) doses at district cold chain point
+      for reactive vaccination. Ensure rapid response team (RRT) readiness with
+      stool sample collection kits and transport media.
+    target_hazards: [waterborne_disease]
+    trigger_condition: >
+      Historical cholera occurrence in district OR neighboring district reports
+      cholera outbreak
+    responsible_officer_role: District Surveillance Officer / CMO
+    indicator: "OCV doses available at district; RRT activation time (target: <24h)"
+    evidence_quality: moderate
+    phase: pre_monsoon
+
+  # --- CROSS-CUTTING ---
+  - id: CRS-001
+    name: ASHA worker climate-health training
+    description: >
+      Conduct 2-day training for all ASHA workers on climate-health linkages,
+      early warning sign recognition for heat illness, waterborne disease, and
+      VBD. Distribute pictorial job aids and mobile-based alert protocols.
+    target_hazards: [heat_wave, flooding, vector_borne_disease, waterborne_disease]
+    trigger_condition: Annual pre-monsoon preparation period (MW 16-20)
+    responsible_officer_role: District Programme Manager (NHM)
+    indicator: "% of ASHA workers completing training by MW 20"
+    evidence_quality: moderate
+    phase: pre_monsoon
+
+  - id: CRS-002
+    name: Health facility emergency preparedness audit
+    description: >
+      Audit all PHCs and CHCs for emergency preparedness: generator backup,
+      water supply, medicine buffer stock, ambulance readiness, communication
+      equipment. Address gaps before monsoon onset.
+    target_hazards: [flooding, cyclone, heat_wave]
+    trigger_condition: Annual pre-monsoon audit (MW 18-22)
+    responsible_officer_role: CMO / District Quality Assurance Committee
+    indicator: "% of facilities scoring ≥80% on preparedness checklist"
+    evidence_quality: moderate
+    phase: pre_monsoon

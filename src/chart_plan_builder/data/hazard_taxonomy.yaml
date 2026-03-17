@@ -1,0 +1,141 @@
+# CHART 16-Hazard Taxonomy
+# Source: CHART knowledge base (Airtable appVDjIOHVtUA4Z3l)
+# Covers climate-sensitive health hazards relevant to India & Africa
+
+hazards:
+  - id: flooding
+    name: Flooding
+    description: Riverine, pluvial, or flash flooding events
+    health_impact_categories:
+      - Drowning and injuries
+      - Waterborne diseases (cholera, leptospirosis)
+      - Mental health impacts
+      - Disruption of health services
+
+  - id: heat_wave
+    name: Heat Wave
+    description: Sustained period of abnormally high temperatures exceeding IMD thresholds
+    health_impact_categories:
+      - Heat stroke and heat exhaustion
+      - Cardiovascular stress
+      - Renal disease exacerbation
+      - Occupational heat illness
+
+  - id: cyclone
+    name: Cyclone
+    description: Tropical cyclone including storm surge and extreme winds
+    health_impact_categories:
+      - Trauma and injuries
+      - Infrastructure destruction
+      - Displacement and mental health
+      - Vector breeding post-event
+
+  - id: drought
+    name: Drought
+    description: Prolonged deficit in precipitation affecting water and food supply
+    health_impact_categories:
+      - Malnutrition and food insecurity
+      - Water scarcity and hygiene-related disease
+      - Mental health and farmer distress
+      - Migration-related health risks
+
+  - id: cold_wave
+    name: Cold Wave
+    description: Sustained abnormally low temperatures
+    health_impact_categories:
+      - Hypothermia
+      - Respiratory infections
+      - Cardiovascular events
+      - Neonatal cold stress
+
+  - id: lightning
+    name: Lightning
+    description: Lightning strikes during convective storms
+    health_impact_categories:
+      - Direct strike fatalities
+      - Burns and cardiac arrest
+      - Outdoor worker risk
+
+  - id: landslide
+    name: Landslide
+    description: Rain-triggered landslides in hilly and mountainous terrain
+    health_impact_categories:
+      - Burial and trauma
+      - Access disruption to health facilities
+      - Displacement
+
+  - id: dust_storm
+    name: Dust Storm
+    description: Wind-driven dust events in arid and semi-arid regions
+    health_impact_categories:
+      - Respiratory illness
+      - Eye infections
+      - Road accidents
+
+  - id: wildfire
+    name: Wildfire
+    description: Uncontrolled fires in forest or grassland areas
+    health_impact_categories:
+      - Burns and smoke inhalation
+      - Respiratory disease from particulate matter
+      - Displacement
+
+  - id: riverine_erosion
+    name: Riverine Erosion
+    description: Progressive erosion of riverbanks displacing communities
+    health_impact_categories:
+      - Displacement and mental health
+      - Loss of health infrastructure
+      - Waterborne disease risk
+
+  - id: sea_level_rise
+    name: Sea Level Rise
+    description: Long-term coastal inundation and saltwater intrusion
+    health_impact_categories:
+      - Salinization of drinking water
+      - Coastal flooding
+      - Displacement
+
+  - id: air_pollution
+    name: Air Pollution
+    description: Elevated PM2.5, PM10, ozone, or NO2 levels
+    health_impact_categories:
+      - Respiratory disease (asthma, COPD)
+      - Cardiovascular disease
+      - Low birth weight
+      - Premature mortality
+
+  - id: vector_borne_disease
+    name: Vector-Borne Disease
+    description: Climate-sensitive VBD including dengue, malaria, chikungunya, JE, kala-azar
+    health_impact_categories:
+      - Dengue fever
+      - Malaria
+      - Japanese encephalitis
+      - Kala-azar (visceral leishmaniasis)
+      - Chikungunya
+
+  - id: waterborne_disease
+    name: Waterborne Disease
+    description: Diarrheal diseases, cholera, typhoid, hepatitis A/E linked to contaminated water
+    health_impact_categories:
+      - Acute diarrheal disease
+      - Cholera outbreaks
+      - Typhoid
+      - Hepatitis A/E
+
+  - id: ultraviolet_radiation
+    name: Ultraviolet Radiation
+    description: Excessive UV exposure from ozone depletion or high-altitude settings
+    health_impact_categories:
+      - Skin cancer
+      - Eye damage (cataracts)
+      - Immune suppression
+
+  - id: humidity_extreme
+    name: Humidity Extreme
+    description: Dangerously high wet-bulb temperatures or sustained high humidity
+    health_impact_categories:
+      - Heat illness (wet-bulb effect)
+      - Fungal infections
+      - Respiratory distress
