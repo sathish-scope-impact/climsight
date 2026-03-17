@@ -15,3 +15,4 @@ venv311
 venv
 tmp/
 .env
+*.egg-info/
